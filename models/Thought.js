@@ -3,8 +3,10 @@ const moment = require('moment');
 
 const ReactionSchema = new Schema(
     {
+        // set custom id to avoid confusion with parent comment's _id field
         reactionId: {
-
+            type: Schema.Types.ObjectId,
+            default: () => new Types.ObjectId()
         },
         reactionBody: {
             type: String,
@@ -43,11 +45,11 @@ const ThoughtSchema = new Schema(
             get: (createdAtVal) => moment(createdAtVal).format('MMM DDD, YYYY [at] hh:mm a')
         },
         username: {
-
+            type: String,
+            require: true
         },
-        reactions: [
-
-        ]
+        //Array of nested documents created with the reactionSchema
+        reactions: [ReactionSchema]
     },
     {
         toJSON: {
@@ -56,6 +58,13 @@ const ThoughtSchema = new Schema(
         }
     }
 );
+
+//Create a virtual called reactionCount that retrieves the 
+//length of the thought's reactions array field on query.
+ThoughtSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
+});
+
 
 const Thought = model('Thought', ThoughtSchema);
 
